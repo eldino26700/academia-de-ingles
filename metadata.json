@@ -1,0 +1,7 @@
+{
+  "name": "LingoVoxel AI",
+  "description": "A gamified language learning experience (English/Spanish) powered by Gemini AI, featuring isometric voxel-style discovery and interest-based content.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
