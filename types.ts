@@ -4,6 +4,7 @@ export type Language = 'english' | 'spanish';
 export interface UserProfile {
   targetLanguage: Language;
   interests: string[];
+  specificInterests: string;
   level: 'beginner' | 'intermediate' | 'advanced';
   xp: number;
   streak: number;
@@ -14,6 +15,12 @@ export interface QuizQuestion {
   options: string[];
   correctAnswer: string;
   explanation: string;
+}
+
+export interface RacingChallenge {
+  prompt: string;
+  correct: string;
+  wrong: string;
 }
 
 export interface VoxelItem {

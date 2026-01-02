@@ -6,10 +6,11 @@ import { Language, QuizQuestion } from '../types';
 interface QuizChallengeProps {
   language: Language;
   interests: string[];
+  specificInterests?: string;
   onCorrect: (xp: number) => void;
 }
 
-const QuizChallenge: React.FC<QuizChallengeProps> = ({ language, interests, onCorrect }) => {
+const QuizChallenge: React.FC<QuizChallengeProps> = ({ language, interests, specificInterests, onCorrect }) => {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -21,7 +22,8 @@ const QuizChallenge: React.FC<QuizChallengeProps> = ({ language, interests, onCo
     const loadQuiz = async () => {
       setLoading(true);
       try {
-        const data = await generateQuiz(language, interests);
+        const query = specificInterests || interests.join(", ");
+        const data = await generateQuiz(language, interests, query);
         setQuestions(data);
       } catch (e) {
         console.error(e);
@@ -30,7 +32,7 @@ const QuizChallenge: React.FC<QuizChallengeProps> = ({ language, interests, onCo
       }
     };
     loadQuiz();
-  }, [language, interests]);
+  }, [language, interests, specificInterests]);
 
   const handleOptionClick = (option: string) => {
     if (showFeedback) return;
@@ -48,19 +50,24 @@ const QuizChallenge: React.FC<QuizChallengeProps> = ({ language, interests, onCo
     setShowFeedback(false);
   };
 
-  if (loading) return <div className="text-center p-12">Loading challenges...</div>;
+  if (loading) return (
+    <div className="text-center p-12 text-emerald-400 tech-font">
+      <i className="fas fa-spinner animate-spin text-4xl mb-4"></i>
+      <p>FETCHING CHALLENGE MODULES...</p>
+    </div>
+  );
 
   if (currentIndex >= questions.length) {
     return (
-      <div className="bg-white rounded-3xl p-10 text-center shadow-2xl border-4 border-emerald-100">
-        <div className="text-6xl mb-6 animate-bounce">🏆</div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Quiz Complete!</h2>
-        <p className="text-lg text-gray-600 mb-8">You got {score} out of {questions.length} correct!</p>
+      <div className="bg-[#0a2e21] rounded-[2.5rem] p-12 text-center shadow-2xl border-4 border-emerald-500/20">
+        <div className="text-7xl mb-6">⚙️</div>
+        <h2 className="text-4xl font-black text-white mb-2 uppercase tracking-tighter">Diagnostic Complete</h2>
+        <p className="text-lg text-emerald-400/60 tech-font mb-8">Score Matrix: {score} / {questions.length} successful pulses</p>
         <button
           onClick={() => window.location.reload()}
-          className="bg-emerald-500 text-white font-bold px-10 py-4 rounded-2xl hover:bg-emerald-600 transition-all shadow-xl"
+          className="bg-emerald-500 text-black font-black px-10 py-5 rounded-2xl hover:bg-emerald-400 transition-all shadow-xl tech-font uppercase"
         >
-          Try Another Quiz
+          Initialize New Test_
         </button>
       </div>
     );
@@ -69,38 +76,41 @@ const QuizChallenge: React.FC<QuizChallengeProps> = ({ language, interests, onCo
   const q = questions[currentIndex];
 
   return (
-    <div className="bg-white rounded-3xl p-8 shadow-2xl border-4 border-indigo-100 max-w-xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <span className="bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full text-sm font-bold">
-          Question {currentIndex + 1} of {questions.length}
-        </span>
-        <div className="h-2 w-32 bg-gray-100 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-indigo-500 transition-all duration-500"
-            style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
-          />
-        </div>
+    <div className="bg-[#0a2e21] rounded-[2.5rem] p-10 shadow-2xl border-4 border-emerald-500/20 max-w-2xl mx-auto relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-1 bg-white/5">
+        <div 
+          className="h-full bg-emerald-500 transition-all duration-700"
+          style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
+        />
       </div>
 
-      <h3 className="text-2xl font-bold text-gray-900 mb-8 leading-tight">
+      <div className="flex justify-between items-center mb-10 mt-4 tech-font">
+        <span className="text-emerald-500 font-bold text-xs uppercase tracking-widest">
+          Node {currentIndex + 1} of {questions.length}
+        </span>
+        <span className="text-white/20 text-xs">LOG_ID: {Math.random().toString(36).substr(2, 6).toUpperCase()}</span>
+      </div>
+
+      <h3 className="text-3xl font-black text-white mb-10 leading-tight">
         {q.question}
       </h3>
 
       <div className="space-y-4">
         {q.options.map((option, idx) => {
-          let styles = "bg-gray-50 border-2 border-gray-100 text-gray-800 hover:bg-white hover:border-indigo-200 transition-all";
+          let styles = "bg-white/5 border-2 border-white/5 text-emerald-100 hover:bg-white/10 hover:border-emerald-500/30 transition-all";
           if (showFeedback) {
-            if (option === q.correctAnswer) styles = "bg-green-100 border-2 border-green-500 text-green-700 font-bold";
-            else if (option === selectedOption) styles = "bg-red-100 border-2 border-red-500 text-red-700";
-            else styles = "bg-gray-50 border-2 border-gray-100 text-gray-300";
+            if (option === q.correctAnswer) styles = "bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400 font-bold shadow-[0_0_15px_rgba(34,197,94,0.3)]";
+            else if (option === selectedOption) styles = "bg-rose-500/20 border-2 border-rose-500 text-rose-400";
+            else styles = "bg-white/5 border-2 border-white/5 text-white/20";
           }
           return (
             <button
               key={idx}
               disabled={showFeedback}
               onClick={() => handleOptionClick(option)}
-              className={`w-full text-left p-5 rounded-2xl text-lg font-medium active:scale-95 ${styles}`}
+              className={`w-full text-left p-6 rounded-2xl text-lg font-medium active:scale-95 tech-font ${styles}`}
             >
+              <span className="opacity-40 mr-4 font-normal">{String.fromCharCode(65 + idx)})</span>
               {option}
             </button>
           );
@@ -108,15 +118,15 @@ const QuizChallenge: React.FC<QuizChallengeProps> = ({ language, interests, onCo
       </div>
 
       {showFeedback && (
-        <div className="mt-8 animate-fadeIn">
-          <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 mb-6 text-indigo-900 text-sm italic">
-            <strong>Pro Tip:</strong> {q.explanation}
+        <div className="mt-10 animate-fadeIn">
+          <div className="p-6 bg-black/40 rounded-2xl border border-white/10 mb-6 text-emerald-100/60 text-sm leading-relaxed italic tech-font">
+            <strong className="text-emerald-400 uppercase mr-2">Core Explanation:</strong> {q.explanation}
           </div>
           <button
             onClick={nextQuestion}
-            className="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-indigo-700 transition-all"
+            className="w-full bg-emerald-500 text-black font-black py-5 rounded-2xl shadow-lg hover:bg-emerald-400 transition-all uppercase tech-font"
           >
-            {currentIndex < questions.length - 1 ? 'Next Question' : 'Finish Quiz'}
+            {currentIndex < questions.length - 1 ? 'Forward Message_' : 'Commit Final Results_'}
           </button>
         </div>
       )}

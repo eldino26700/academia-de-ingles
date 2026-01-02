@@ -31,7 +31,8 @@ const ConversationMaster: React.FC<ConversationMasterProps> = ({ language, inter
     onCorrect(5); // Reward for participation
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+      // Re-initialize GoogleGenAI right before the call as per guidelines
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const chat = ai.chats.create({
         model: 'gemini-3-flash-preview',
         config: {
@@ -39,8 +40,8 @@ const ConversationMaster: React.FC<ConversationMasterProps> = ({ language, inter
         },
       });
 
-      // Simple way for the demo: history consists of previous messages
       const response = await chat.sendMessage({ message: input });
+      // response.text is a property, not a method
       setMessages(prev => [...prev, { role: 'model', text: response.text || "I'm listening!" }]);
     } catch (error) {
       console.error("Chat error:", error);

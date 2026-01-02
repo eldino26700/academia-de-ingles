@@ -13,6 +13,7 @@ export const INTEREST_OPTIONS = [
 export const INITIAL_PROFILE = {
   targetLanguage: 'english' as const,
   interests: [],
+  specificInterests: '',
   level: 'beginner' as const,
   xp: 0,
   streak: 0,
